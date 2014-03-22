@@ -1,0 +1,10 @@
+C:\Users\Rob\Desktop\MCP2515DM-BM again\Bus Pirate V4 GUI\Bus Pirate V4 GUI\bin\Debug\Bus Pirate V4 GUI.exe.config
+C:\Users\Rob\Desktop\Bus_Pirate_V4\Bus Pirate V4 GUI\Bus Pirate V4 GUI\bin\Debug\Bus Pirate V4 GUI.exe.config
+C:\Users\Rob\Desktop\Bus_Pirate_V4\Bus Pirate V4 GUI\Bus Pirate V4 GUI\obj\Debug\Bus Pirate V4 GUI.csprojResolveAssemblyReference.cache
+C:\Users\Rob\Desktop\Bus_Pirate_V4\Bus Pirate V4 GUI\Bus Pirate V4 GUI\obj\Debug\Bus_Pirate_V4_GUI.Form1.resources
+C:\Users\Rob\Desktop\Bus_Pirate_V4\Bus Pirate V4 GUI\Bus Pirate V4 GUI\obj\Debug\Bus_Pirate_V4_GUI.Properties.Resources.resources
+C:\Users\Rob\Desktop\Bus_Pirate_V4\Bus Pirate V4 GUI\Bus Pirate V4 GUI\obj\Debug\Bus Pirate V4 GUI.csproj.GenerateResource.Cache
+C:\Users\Rob\Desktop\Bus_Pirate_V4\Bus Pirate V4 GUI\Bus Pirate V4 GUI\bin\Debug\Bus Pirate V4 GUI.exe
+C:\Users\Rob\Desktop\Bus_Pirate_V4\Bus Pirate V4 GUI\Bus Pirate V4 GUI\bin\Debug\Bus Pirate V4 GUI.pdb
+C:\Users\Rob\Desktop\Bus_Pirate_V4\Bus Pirate V4 GUI\Bus Pirate V4 GUI\obj\Debug\Bus Pirate V4 GUI.exe
+C:\Users\Rob\Desktop\Bus_Pirate_V4\Bus Pirate V4 GUI\Bus Pirate V4 GUI\obj\Debug\Bus Pirate V4 GUI.pdb
