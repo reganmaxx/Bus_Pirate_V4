@@ -17,10 +17,16 @@ namespace Bus_Pirate_V4_GUI
     {
         //Serial Port
         private SerialPort _serialPort;
-        private int _portBaud;
 
         //BP4 parameters
         int _currMode = -1;
+
+        //voltmeter
+        double _currentvoltage;
+        bool _voltReq = false;
+
+        //Frequency
+        bool _freqReq = false;
 
         public Form1()
         {
@@ -30,13 +36,14 @@ namespace Bus_Pirate_V4_GUI
         private void Form1_Load(object sender, EventArgs e)
         {
             loadCommPorts();
+            baudcombobox.SelectedIndex = 1;
         }
 
         private void createSerialPort(string portName)
         {
             _serialPort = serialPort1;
             _serialPort.PortName = portName;
-            //_serialPort.BaudRate = 9600;
+            _serialPort.BaudRate = Convert.ToInt32(baudcombobox.SelectedItem.ToString());
             _serialPort.Open();
             Thread.Sleep(100);
             if (_serialPort.IsOpen)
@@ -53,6 +60,7 @@ namespace Bus_Pirate_V4_GUI
         private void loadCommPorts()
         {
             string[] commPorts = SerialPort.GetPortNames();
+            serialportscombobox.Items.Clear();
             serialportscombobox.Items.AddRange(commPorts);
 
             if (commPorts.Length > 0)
@@ -64,23 +72,94 @@ namespace Bus_Pirate_V4_GUI
         private void serialPortDataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             int bytesToRead = _serialPort.BytesToRead;
+            Debug.Print(bytesToRead.ToString());
             byte[] inBuffer = new byte[bytesToRead];
             _serialPort.Read(inBuffer, 0, bytesToRead);
+
             handleInBuffer(inBuffer);
         }
 
         private void handleInBuffer(byte[] inBuffer)
         {
-            //check mode
             checkCurrMode(inBuffer);
-            outputToRawTxtBox(System.Text.Encoding.ASCII.GetString(inBuffer));
-            Debug.Print(System.Text.Encoding.ASCII.GetString(inBuffer));
+            if (System.Text.Encoding.ASCII.GetString(inBuffer).Contains('\b') && _voltReq)//continuously reading voltage
+            {
+                if (_currMode == 12)
+                {
+                    string data = System.Text.Encoding.ASCII.GetString(inBuffer);
+                    data = removeUnwantedCharacters(data);
+                    if (data[0] == 'D')
+                    {
+                        string voltage = data.Substring(data.IndexOf(":") + 2, 5);
+                        if (voltage[4] == 'V')
+                        {
+                            _currentvoltage = Convert.ToDouble(voltage.Substring(0, voltage.IndexOf('V')));
+                        }
+                        voltstxtbox.Invoke(new Action(() => voltstxtbox.Text = _currentvoltage.ToString()));
+                    }
+                    else
+                    {
+                        while (data.Contains('V'))
+                        {
+                            if (data[0] == 'V') data = data.Substring(1, data.Length - 1);
+                            _currentvoltage = Convert.ToDouble(data.Substring(0, data.IndexOf('V')));
+                            voltstxtbox.Invoke(new Action(() => voltstxtbox.Text = _currentvoltage.ToString()));
+                            data = data.Substring(data.IndexOf('V') + 1, data.Length - 5);
+                            int length = data.Length;
+                        }
+                    }
+                }
+            }
+            else if (System.Text.Encoding.ASCII.GetString(inBuffer).Contains("Hz") && _freqReq)//reading frequency
+            {
+                outputToRawTxtBox(System.Text.Encoding.ASCII.GetString(inBuffer));
+                string data = System.Text.Encoding.ASCII.GetString(inBuffer);
+                data = data.Substring(0, data.IndexOf('\r'));
+                freqtxtbox.Invoke(new Action (()=> freqtxtbox.Text = data));
+                _freqReq = false;
+            }
+            else if (System.Text.Encoding.ASCII.GetString(inBuffer)[0] == 'd' && _voltReq)//single voltage read
+            {
+                outputToRawTxtBox(System.Text.Encoding.ASCII.GetString(inBuffer));
+                string data = System.Text.Encoding.ASCII.GetString(inBuffer);
+                data = data.Substring(data.IndexOf(":")+1, 5);
+                voltstxtbox.Invoke(new Action(() => voltstxtbox.Text = data));
+                _voltReq = false;
+            }
+            else//all others
+            {
+                //check mode
+                outputToRawTxtBox(System.Text.Encoding.ASCII.GetString(inBuffer));
+                //Debug.Print(System.Text.Encoding.ASCII.GetString(inBuffer));
+            }
         }
+
+        private string removeUnwantedCharacters(string message)
+        {
+            while (message.Contains('\b'))
+            {
+                message = message.Remove(message.IndexOf('\b'),1);
+            }
+            return message;
+        }
+
 
         private void serialconnect_Click(object sender, EventArgs e)
         {
-            createSerialPort(serialportscombobox.SelectedItem.ToString());
-            setHiZ();
+            if (serialconnect.Text == "Connect")
+            {
+                createSerialPort(serialportscombobox.SelectedItem.ToString());
+                setHiZ();
+                serialconnect.Text = "Disconnect";
+                refreshbtn.Enabled = false;
+            }
+            else
+            {
+                _serialPort.Close();
+                serialconnect.Text = "Connect";
+                refreshbtn.Enabled = true;
+            }
+
         }
 
         private void setHiZ()
@@ -100,6 +179,8 @@ namespace Bus_Pirate_V4_GUI
             }
             else
             {
+                rawdatarichtxtbox.AppendText(msgToSend);
+                rawdatarichtxtbox.ScrollToCaret();
             }
         }
 
@@ -112,8 +193,16 @@ namespace Bus_Pirate_V4_GUI
         {
             if (_serialPort.IsOpen)
             {
-                _serialPort.WriteLine(msg);
-                return true;
+                try
+                {
+                    _serialPort.WriteLine(msg);
+                    return true;
+                }
+                catch
+                {
+                    changeStatusLbl("Failed to send message to Bus Pirate");
+                    return false;
+                }
             }
             else
             {
@@ -124,32 +213,59 @@ namespace Bus_Pirate_V4_GUI
 
         private void checkCurrMode(byte[] inBuffer)
         {
-            string response = System.Text.Encoding.ASCII.GetString(inBuffer);
-            byte[] checkMenu = inBuffer.Take(1).ToArray();
-            string request = System.Text.Encoding.ASCII.GetString(checkMenu);
-            byte[] modeBuffer = inBuffer.Skip(3).Take(3).ToArray();
-            string mode = System.Text.Encoding.ASCII.GetString(modeBuffer);
-            if (request == "m")
+            if (inBuffer.Length > 4)
             {
-                //changeModeLbl("Menu");
-                //_currMode = 0;
-            }
+                string response = System.Text.Encoding.ASCII.GetString(inBuffer);
+                string mode = response.Substring(response.Length - 4, 3);
+                if (mode == "-WI") mode = response.Substring(response.Length - 5, 3);
+                //byte[] checkMenu = inBuffer.Take(1).ToArray();
+                //string request = System.Text.Encoding.ASCII.GetString(checkMenu);
+                //byte[] modeBuffer = inBuffer.Skip(3).Take(3).ToArray();
+                //string mode = System.Text.Encoding.ASCII.GetString(modeBuffer);
 
-            switch (mode)
-            {
-                case "HiZ":
-                    _currMode = 1;
-                    updateMode();
-                    break;
-                case "1WI":
-                    _currMode = 2;
-                    updateMode();
-                    break;
-                case "UAR":
-                    _currMode = 3;
-                    updateMode();
-                    break;
-
+                switch (mode)
+                {
+                    case "HiZ":
+                        _currMode = 1;
+                        updateMode();
+                        break;
+                    case "1-W":
+                        _currMode = 2;
+                        updateMode();
+                        break;
+                    case "UAR":
+                        _currMode = 3;
+                        updateMode();
+                        break;
+                    case "I2C":
+                        _currMode = 4;
+                        updateMode();
+                        break;
+                    case "SPI":
+                        _currMode = 5;
+                        updateMode();
+                        break;
+                    case "JTA":
+                        _currMode = 6;
+                        updateMode();
+                        break;
+                    case "2-W":
+                        _currMode = 7;
+                        updateMode();
+                        break;
+                    case "3-W":
+                        _currMode = 8;
+                        updateMode();
+                        break;
+                    case "LCD":
+                        _currMode = 11;
+                        updateMode();
+                        break;
+                    case "DIO":
+                        _currMode = 13;
+                        updateMode();
+                        break;
+                }
             }
         }
 
@@ -182,10 +298,10 @@ namespace Bus_Pirate_V4_GUI
                     changeModeLbl("JTAG");
                     break;
                 case 7:
-                    changeModeLbl("Raw2Wire");
+                    changeModeLbl("2-Wire");
                     break;
                 case 8:
-                    changeModeLbl("Raw3Wire");
+                    changeModeLbl("3-Wire");
                     break;
                 case 9:
                     changeModeLbl("PC Keyboard");
@@ -195,6 +311,12 @@ namespace Bus_Pirate_V4_GUI
                     break;
                 case 11:
                     changeModeLbl("LCD");
+                    break;
+                case 12:
+                    changeModeLbl("Voltmeter");
+                    break;
+                case 13:
+                    changeModeLbl("DIO");
                     break;
             }
         }
@@ -240,8 +362,118 @@ namespace Bus_Pirate_V4_GUI
                 bool ret = outputToBP("w");
                 if (!ret) powersupplychckbox.Checked = false;
             }
-
         }
+
+        private void refreshbtn_Click(object sender, EventArgs e)
+        {
+            loadCommPorts();
+        }
+
+        private void resetbtn_Click(object sender, EventArgs e)
+        {
+            outputToBP("#");
+        }
+
+        private void selftestbtn_Click(object sender, EventArgs e)
+        {
+            outputToBP("~");
+        }
+
+        private void versionbtn_Click(object sender, EventArgs e)
+        {
+            outputToBP("i");
+        }
+
+        private void menubtn_Click(object sender, EventArgs e)
+        {
+            outputToBP("m");
+        }
+
+        private void voltmeterchckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (voltmeterchckbox.Checked == true)
+            {
+                _voltReq = true;
+                _currMode = 12;
+                outputToBP("D");
+                updateMode();
+                //disable all other controls
+            }
+            else
+            {
+                _voltReq = false;
+                _currMode = 0;
+                outputToBP(" ");
+                Thread.Sleep(100);
+                outputToBP("m");
+                updateMode();
+                //enable all other controls
+            }
+            
+        }
+
+        private void auxcombobox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch (auxcombobox.SelectedIndex)
+            {
+                case 0:
+                    outputToBP("a");
+                    break;
+                case 1:
+                    outputToBP("A");
+                    break;
+                case 2:
+                    outputToBP("@");
+                    break;
+            }
+        }
+
+        private void adconeshotbtn_Click(object sender, EventArgs e)
+        {
+            outputToBP("d");
+            _voltReq = true;
+        }
+
+        private void freqbtn_Click(object sender, EventArgs e)
+        {
+            outputToBP("f");
+            _freqReq = true;
+        }
+
+        private void formatcombobox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            outputToBP("o");
+            Thread.Sleep(100);
+            switch (formatcombobox.SelectedIndex)
+            {
+                case 0://hex
+                    outputToBP("1");
+                    break;
+                case 1://dec
+                    outputToBP("2");
+                    break;
+                case 2://bin
+                    outputToBP("3");
+                    break;
+                case 3://raw
+                    outputToBP("4");
+                    break;
+            }
+        }
+
+        private void pwmchckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (pwmchckbox.Checked)
+            {
+                outputToBP("g");
+            }
+            else
+            {
+                outputToBP("g");
+            }
+        }
+
+
 
     }
 }
