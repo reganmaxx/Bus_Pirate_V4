@@ -80,14 +80,23 @@ namespace Bus_Pirate_V4_GUI
         private void serialconnect_Click(object sender, EventArgs e)
         {
             createSerialPort(serialportscombobox.SelectedItem.ToString());
+            setHiZ();
+        }
+
+        private void setHiZ()
+        {
+            outputToBP("m");
+            Thread.Sleep(5);
+            outputToBP("1");
+            Thread.Sleep(5);
         }
 
         private void outputToRawTxtBox(string msgToSend)
         {
             if (this.InvokeRequired)
             {
-                rawtxtbox.Invoke(new Action(() => rawtxtbox.Text = rawtxtbox.Text + "\n" + msgToSend));
-                //rawdatalistbox.Invoke(new Action(() => rawdatalistbox.Items.Add(msgToSend)));
+                rawdatarichtxtbox.Invoke(new Action (()=> rawdatarichtxtbox.AppendText(msgToSend)));
+                rawdatarichtxtbox.Invoke(new Action(() => rawdatarichtxtbox.ScrollToCaret()));
             }
             else
             {
@@ -96,8 +105,21 @@ namespace Bus_Pirate_V4_GUI
 
         private void sendbtn_Click(object sender, EventArgs e)
         {
-            _serialPort.WriteLine(sendtxtbox.Text);
-            //_serialPort.Write(sendtxtbox.Text + "\r");
+           outputToBP(sendtxtbox.Text);
+        }
+
+        private bool outputToBP(string msg)
+        {
+            if (_serialPort.IsOpen)
+            {
+                _serialPort.WriteLine(msg);
+                return true;
+            }
+            else
+            {
+                changeStatusLbl("Failed to send message to Bus Pirate");
+                return false;
+            }
         }
 
         private void checkCurrMode(byte[] inBuffer)
@@ -109,11 +131,72 @@ namespace Bus_Pirate_V4_GUI
             string mode = System.Text.Encoding.ASCII.GetString(modeBuffer);
             if (request == "m")
             {
-                changeModeLbl("Menu");
-                _currMode = 0;
+                //changeModeLbl("Menu");
+                //_currMode = 0;
             }
 
-            
+            switch (mode)
+            {
+                case "HiZ":
+                    _currMode = 1;
+                    updateMode();
+                    break;
+                case "1WI":
+                    _currMode = 2;
+                    updateMode();
+                    break;
+                case "UAR":
+                    _currMode = 3;
+                    updateMode();
+                    break;
+
+            }
+        }
+
+        private void updateMode()
+        {
+            switch (_currMode)
+            {
+                case -1:
+                    changeModeLbl("Mode");
+                    break;
+                case 0:
+                    changeModeLbl("Menu");
+                    break;
+                case 1://all high impedance all off
+                    changeModeLbl("HiZ");
+                    break;
+                case 2:
+                    changeModeLbl("1-Wire");
+                    break;
+                case 3:
+                    changeModeLbl("UART");
+                    break;
+                case 4:
+                    changeModeLbl("I2C");
+                    break;
+                case 5:
+                    changeModeLbl("SPI");
+                    break;
+                case 6:
+                    changeModeLbl("JTAG");
+                    break;
+                case 7:
+                    changeModeLbl("Raw2Wire");
+                    break;
+                case 8:
+                    changeModeLbl("Raw3Wire");
+                    break;
+                case 9:
+                    changeModeLbl("PC Keyboard");
+                    break;
+                case 10:
+                    changeModeLbl("MIDI");
+                    break;
+                case 11:
+                    changeModeLbl("LCD");
+                    break;
+            }
         }
 
         private void changeModeLbl(string mode)
@@ -128,14 +211,36 @@ namespace Bus_Pirate_V4_GUI
             }
         }
 
-        private void powerSupplysOn()
+        private void changeStatusLbl(string label)
         {
-            if (_serialPort.IsOpen)
+            if (this.InvokeRequired)
             {
-                _serialPort.WriteLine("m");
-                _serialPort.WriteLine("W");
-                _serialPort.WriteLine("m");
+                Invoke((MethodInvoker)delegate { statuslbl.Text = label; });
             }
+            else
+            {
+                statuslbl.Text = label;
+            }
+        }
+
+        private void macromenubtn_Click(object sender, EventArgs e)
+        {
+            outputToBP("(0)");
+        }
+
+        private void powersupplychckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (powersupplychckbox.Checked == true && _serialPort.IsOpen)
+            {
+                bool ret = outputToBP("W");
+                if (!ret) powersupplychckbox.Checked = false;
+            }
+            else if (powersupplychckbox.Checked == false && _serialPort.IsOpen)
+            {
+                bool ret = outputToBP("w");
+                if (!ret) powersupplychckbox.Checked = false;
+            }
+
         }
 
     }
