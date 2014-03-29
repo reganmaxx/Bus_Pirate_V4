@@ -401,6 +401,7 @@ namespace Bus_Pirate_V4_GUI
             }
             else
             {
+                _serialPort.DiscardInBuffer();
                 _voltReq = false;
                 _currMode = 0;
                 outputToBP(" ");
@@ -472,6 +473,38 @@ namespace Bus_Pirate_V4_GUI
                 outputToBP("g");
             }
         }
+
+        private void helpbtn_Click(object sender, EventArgs e)
+        {
+            help help = new help();
+            help.Show();
+        }
+
+        private void macrobtn1_Click(object sender, EventArgs e)
+        {
+            outputToBP("1");
+        }
+
+        private void macro2btn_Click(object sender, EventArgs e)
+        {
+            outputToBP("2");
+        }
+
+        private void macrobtn3_Click(object sender, EventArgs e)
+        {
+            outputToBP("3");
+        }
+
+        private void macrobtn4_Click(object sender, EventArgs e)
+        {
+            outputToBP("4");
+        }
+
+        private void macrobtn5_Click(object sender, EventArgs e)
+        {
+            outputToBP("5");
+        }
+
 
 
 

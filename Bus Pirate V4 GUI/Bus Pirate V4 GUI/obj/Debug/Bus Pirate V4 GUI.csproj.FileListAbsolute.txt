@@ -8,3 +8,4 @@ C:\Users\Rob\Desktop\Bus_Pirate_V4\Bus Pirate V4 GUI\Bus Pirate V4 GUI\bin\Debug
 C:\Users\Rob\Desktop\Bus_Pirate_V4\Bus Pirate V4 GUI\Bus Pirate V4 GUI\bin\Debug\Bus Pirate V4 GUI.pdb
 C:\Users\Rob\Desktop\Bus_Pirate_V4\Bus Pirate V4 GUI\Bus Pirate V4 GUI\obj\Debug\Bus Pirate V4 GUI.exe
 C:\Users\Rob\Desktop\Bus_Pirate_V4\Bus Pirate V4 GUI\Bus Pirate V4 GUI\obj\Debug\Bus Pirate V4 GUI.pdb
+C:\Users\Rob\Desktop\Bus_Pirate_V4\Bus Pirate V4 GUI\Bus Pirate V4 GUI\obj\Debug\Bus_Pirate_V4_GUI.help.resources

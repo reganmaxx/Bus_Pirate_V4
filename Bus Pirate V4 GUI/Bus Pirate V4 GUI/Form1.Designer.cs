@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.serialPort1 = new System.IO.Ports.SerialPort(this.components);
             this.serialportscombobox = new System.Windows.Forms.ComboBox();
             this.serialconnect = new System.Windows.Forms.Button();
@@ -38,6 +39,9 @@
             this.sendtxtbox = new System.Windows.Forms.TextBox();
             this.sendbtn = new System.Windows.Forms.Button();
             this.boardcontrolgroupbox = new System.Windows.Forms.GroupBox();
+            this.pwmchckbox = new System.Windows.Forms.CheckBox();
+            this.formatlbl = new System.Windows.Forms.Label();
+            this.formatcombobox = new System.Windows.Forms.ComboBox();
             this.auxlbl = new System.Windows.Forms.Label();
             this.auxcombobox = new System.Windows.Forms.ComboBox();
             this.voltmeterchckbox = new System.Windows.Forms.CheckBox();
@@ -64,9 +68,7 @@
             this.adconeshotbtn = new System.Windows.Forms.Button();
             this.voltslbl = new System.Windows.Forms.Label();
             this.voltstxtbox = new System.Windows.Forms.TextBox();
-            this.formatcombobox = new System.Windows.Forms.ComboBox();
-            this.formatlbl = new System.Windows.Forms.Label();
-            this.pwmchckbox = new System.Windows.Forms.CheckBox();
+            this.helpbtn = new System.Windows.Forms.Button();
             this.statusStrip1.SuspendLayout();
             this.boardcontrolgroupbox.SuspendLayout();
             this.macrosgroupdbox.SuspendLayout();
@@ -89,7 +91,7 @@
             // 
             this.serialconnect.Location = new System.Drawing.Point(189, 10);
             this.serialconnect.Name = "serialconnect";
-            this.serialconnect.Size = new System.Drawing.Size(58, 23);
+            this.serialconnect.Size = new System.Drawing.Size(69, 23);
             this.serialconnect.TabIndex = 2;
             this.serialconnect.Text = "Connect";
             this.serialconnect.UseVisualStyleBackColor = true;
@@ -151,17 +153,51 @@
             this.boardcontrolgroupbox.Controls.Add(this.selftestbtn);
             this.boardcontrolgroupbox.Controls.Add(this.pullupchckbox);
             this.boardcontrolgroupbox.Controls.Add(this.powersupplychckbox);
-            this.boardcontrolgroupbox.Location = new System.Drawing.Point(573, 38);
+            this.boardcontrolgroupbox.Location = new System.Drawing.Point(327, 38);
             this.boardcontrolgroupbox.Name = "boardcontrolgroupbox";
-            this.boardcontrolgroupbox.Size = new System.Drawing.Size(170, 211);
+            this.boardcontrolgroupbox.Size = new System.Drawing.Size(416, 211);
             this.boardcontrolgroupbox.TabIndex = 7;
             this.boardcontrolgroupbox.TabStop = false;
             this.boardcontrolgroupbox.Text = "Board Control";
             // 
+            // pwmchckbox
+            // 
+            this.pwmchckbox.AutoSize = true;
+            this.pwmchckbox.Location = new System.Drawing.Point(7, 90);
+            this.pwmchckbox.Name = "pwmchckbox";
+            this.pwmchckbox.Size = new System.Drawing.Size(53, 17);
+            this.pwmchckbox.TabIndex = 11;
+            this.pwmchckbox.Text = "PWM";
+            this.pwmchckbox.UseVisualStyleBackColor = true;
+            this.pwmchckbox.CheckedChanged += new System.EventHandler(this.pwmchckbox_CheckedChanged);
+            // 
+            // formatlbl
+            // 
+            this.formatlbl.AutoSize = true;
+            this.formatlbl.Location = new System.Drawing.Point(23, 156);
+            this.formatlbl.Name = "formatlbl";
+            this.formatlbl.Size = new System.Drawing.Size(65, 13);
+            this.formatlbl.TabIndex = 10;
+            this.formatlbl.Text = "Data Format";
+            // 
+            // formatcombobox
+            // 
+            this.formatcombobox.FormattingEnabled = true;
+            this.formatcombobox.Items.AddRange(new object[] {
+            "HEX",
+            "DEC",
+            "BIN",
+            "RAW"});
+            this.formatcombobox.Location = new System.Drawing.Point(7, 172);
+            this.formatcombobox.Name = "formatcombobox";
+            this.formatcombobox.Size = new System.Drawing.Size(91, 21);
+            this.formatcombobox.TabIndex = 9;
+            this.formatcombobox.SelectedIndexChanged += new System.EventHandler(this.formatcombobox_SelectedIndexChanged);
+            // 
             // auxlbl
             // 
             this.auxlbl.AutoSize = true;
-            this.auxlbl.Location = new System.Drawing.Point(39, 109);
+            this.auxlbl.Location = new System.Drawing.Point(39, 115);
             this.auxlbl.Name = "auxlbl";
             this.auxlbl.Size = new System.Drawing.Size(25, 13);
             this.auxlbl.TabIndex = 8;
@@ -174,7 +210,7 @@
             "Low",
             "High",
             "Read"});
-            this.auxcombobox.Location = new System.Drawing.Point(7, 126);
+            this.auxcombobox.Location = new System.Drawing.Point(7, 132);
             this.auxcombobox.Name = "auxcombobox";
             this.auxcombobox.Size = new System.Drawing.Size(91, 21);
             this.auxcombobox.TabIndex = 7;
@@ -275,6 +311,7 @@
             this.macrobtn5.TabIndex = 5;
             this.macrobtn5.Text = "5";
             this.macrobtn5.UseVisualStyleBackColor = true;
+            this.macrobtn5.Click += new System.EventHandler(this.macrobtn5_Click);
             // 
             // macrobtn4
             // 
@@ -284,6 +321,7 @@
             this.macrobtn4.TabIndex = 4;
             this.macrobtn4.Text = "4";
             this.macrobtn4.UseVisualStyleBackColor = true;
+            this.macrobtn4.Click += new System.EventHandler(this.macrobtn4_Click);
             // 
             // macrobtn3
             // 
@@ -293,6 +331,7 @@
             this.macrobtn3.TabIndex = 3;
             this.macrobtn3.Text = "3";
             this.macrobtn3.UseVisualStyleBackColor = true;
+            this.macrobtn3.Click += new System.EventHandler(this.macrobtn3_Click);
             // 
             // macro2btn
             // 
@@ -302,6 +341,7 @@
             this.macro2btn.TabIndex = 2;
             this.macro2btn.Text = "2";
             this.macro2btn.UseVisualStyleBackColor = true;
+            this.macro2btn.Click += new System.EventHandler(this.macro2btn_Click);
             // 
             // macrobtn1
             // 
@@ -311,6 +351,7 @@
             this.macrobtn1.TabIndex = 1;
             this.macrobtn1.Text = "1";
             this.macrobtn1.UseVisualStyleBackColor = true;
+            this.macrobtn1.Click += new System.EventHandler(this.macrobtn1_Click);
             // 
             // macromenubtn
             // 
@@ -332,7 +373,7 @@
             // 
             // refreshbtn
             // 
-            this.refreshbtn.Location = new System.Drawing.Point(253, 10);
+            this.refreshbtn.Location = new System.Drawing.Point(264, 10);
             this.refreshbtn.Name = "refreshbtn";
             this.refreshbtn.Size = new System.Drawing.Size(52, 23);
             this.refreshbtn.TabIndex = 10;
@@ -359,9 +400,9 @@
             this.measurementgroupbox.Controls.Add(this.adconeshotbtn);
             this.measurementgroupbox.Controls.Add(this.voltslbl);
             this.measurementgroupbox.Controls.Add(this.voltstxtbox);
-            this.measurementgroupbox.Location = new System.Drawing.Point(327, 77);
+            this.measurementgroupbox.Location = new System.Drawing.Point(327, 264);
             this.measurementgroupbox.Name = "measurementgroupbox";
-            this.measurementgroupbox.Size = new System.Drawing.Size(240, 260);
+            this.measurementgroupbox.Size = new System.Drawing.Size(200, 73);
             this.measurementgroupbox.TabIndex = 12;
             this.measurementgroupbox.TabStop = false;
             this.measurementgroupbox.Text = "Measurement";
@@ -418,45 +459,23 @@
             this.voltstxtbox.Size = new System.Drawing.Size(100, 20);
             this.voltstxtbox.TabIndex = 0;
             // 
-            // formatcombobox
+            // helpbtn
             // 
-            this.formatcombobox.FormattingEnabled = true;
-            this.formatcombobox.Items.AddRange(new object[] {
-            "HEX",
-            "DEC",
-            "BIN",
-            "RAW"});
-            this.formatcombobox.Location = new System.Drawing.Point(7, 166);
-            this.formatcombobox.Name = "formatcombobox";
-            this.formatcombobox.Size = new System.Drawing.Size(91, 21);
-            this.formatcombobox.TabIndex = 9;
-            this.formatcombobox.SelectedIndexChanged += new System.EventHandler(this.formatcombobox_SelectedIndexChanged);
-            // 
-            // formatlbl
-            // 
-            this.formatlbl.AutoSize = true;
-            this.formatlbl.Location = new System.Drawing.Point(23, 150);
-            this.formatlbl.Name = "formatlbl";
-            this.formatlbl.Size = new System.Drawing.Size(65, 13);
-            this.formatlbl.TabIndex = 10;
-            this.formatlbl.Text = "Data Format";
-            // 
-            // pwmchckbox
-            // 
-            this.pwmchckbox.AutoSize = true;
-            this.pwmchckbox.Location = new System.Drawing.Point(7, 90);
-            this.pwmchckbox.Name = "pwmchckbox";
-            this.pwmchckbox.Size = new System.Drawing.Size(53, 17);
-            this.pwmchckbox.TabIndex = 11;
-            this.pwmchckbox.Text = "PWM";
-            this.pwmchckbox.UseVisualStyleBackColor = true;
-            this.pwmchckbox.CheckedChanged += new System.EventHandler(this.pwmchckbox_CheckedChanged);
+            this.helpbtn.Location = new System.Drawing.Point(668, 9);
+            this.helpbtn.Name = "helpbtn";
+            this.helpbtn.Size = new System.Drawing.Size(75, 23);
+            this.helpbtn.TabIndex = 13;
+            this.helpbtn.Text = "Help";
+            this.helpbtn.UseVisualStyleBackColor = true;
+            this.helpbtn.Click += new System.EventHandler(this.helpbtn_Click);
             // 
             // Form1
             // 
+            this.AcceptButton = this.sendbtn;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(755, 384);
+            this.Controls.Add(this.helpbtn);
             this.Controls.Add(this.measurementgroupbox);
             this.Controls.Add(this.baudcombobox);
             this.Controls.Add(this.refreshbtn);
@@ -468,6 +487,7 @@
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.serialconnect);
             this.Controls.Add(this.serialportscombobox);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
             this.Text = "Bus Pirate V4 GUI";
             this.Load += new System.EventHandler(this.Form1_Load);
@@ -523,6 +543,7 @@
         private System.Windows.Forms.Label formatlbl;
         private System.Windows.Forms.ComboBox formatcombobox;
         private System.Windows.Forms.CheckBox pwmchckbox;
+        private System.Windows.Forms.Button helpbtn;
     }
 }
 
